@@ -128,7 +128,7 @@ def prospector(  # noqa: C901
                 )
                 _logger.debug("The backend returned status '%d'" % r.status_code)
                 if r.status_code != 200:
-                    _logger.error("This is weird...Continuing anyway.")
+                    _logger.info("Commit(s) not available in the database...")
                     missing = candidates
                 else:
                     raw_commit_data = r.json()

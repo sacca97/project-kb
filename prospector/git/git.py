@@ -186,6 +186,7 @@ class Git:
 
         _logger.debug(f"Cloning {self._url} (shallow={self._shallow_clone})")
 
+        # What error is this
         if not self._exec.run(["git", "init"], ignore_output=True, cache=True):
             _logger.error(f"Failed to initialize repository in {self._path}")
 

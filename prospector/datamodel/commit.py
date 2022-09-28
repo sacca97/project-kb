@@ -27,7 +27,7 @@ class Commit(BaseModel):
     message_reference_content: List[str] = Field(default_factory=list)
     jira_refs: Dict[str, str] = Field(default_factory=dict)
     ghissue_refs: Dict[str, str] = Field(default_factory=dict)
-    cve_refs: Dict[str, str] = Field(default_factory=dict)
+    cve_refs: List[str] = Field(default_factory=list)  # become list of strings
     tags: List[str] = Field(default_factory=list)
     annotations: Dict[str, str] = Field(default_factory=dict)
     weight: int = 0
@@ -36,7 +36,7 @@ class Commit(BaseModel):
     def hunk_count(self):
         return len(self.hunks)
 
-    # Re-implement these two methods to allow sorting by weight
+    # Re-implement these two methods allows sorting by weight
     def __lt__(self, other) -> bool:
         return self.weight < other.weight
 

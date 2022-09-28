@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
 from fastapi.responses import JSONResponse
 
 from api import DB_CONNECT_STRING
@@ -15,23 +15,19 @@ router = APIRouter(
 
 
 # -----------------------------------------------------------------------------
-@router.get("/{repository_url:path}")
+@router.get("/{repository_url:path}", status_code=200)
 async def get_commits(
-    repository_url: str,
-    commit_id: Optional[str] = None,
+    repository_url: str, commit_id: Optional[str] = None, response=Response
 ):
     db = PostgresCommitDB()
     db.connect(DB_CONNECT_STRING)
     # use case: if a particular commit is queried, details should be returned
     data = db.lookup(repository_url, commit_id)
-    res = []
-    if len(data):
-        for d in data:
-            if d:
-                res.append(d.dict())
-            else:
-                res.append(None)
-    return JSONResponse(res)
+    if not len(data):
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return response
+
+    return JSONResponse([d.dict() for d in data])
 
 
 # -----------------------------------------------------------------------------
