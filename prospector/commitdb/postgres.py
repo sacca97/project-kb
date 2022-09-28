@@ -99,64 +99,24 @@ class PostgresCommitDB(CommitDB):
 
         try:
             cur = self.connection.cursor()
-            cur.execute(
-                """INSERT INTO commits(
-                    commit_id,
-                    repository,
-                    timestamp,
-                    hunks,
-                    hunk_count,
-                    message,
-                    diff,
-                    changed_files,
-                    message_reference_content,
-                    jira_refs,
-                    ghissue_refs_id,
-                    ghissue_refs_content,
-                    cve_refs,
-                    tags)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT ON CONSTRAINT commits_pkey DO UPDATE SET (
-                        timestamp,
-                        hunks,
-                        hunk_count,
-                        message,
-                        diff,
-                        changed_files,
-                        message_reference_content,
-                        jira_refs,
-                        ghissue_refs,
-                        cve_refs,
-                        tags) = (
-                            EXCLUDED.timestamp,
-                            EXCLUDED.hunks,
-                            EXCLUDED.hunk_count,
-                            EXCLUDED.message,
-                            EXCLUDED.diff,
-                            EXCLUDED.changed_files,
-                            EXCLUDED.message_reference_content,
-                            EXCLUDED.jira_refs,
-                            EXCLUDED.ghissue_refs_id,
-                            EXCLUDED.ghissue_refs_content,
-                            EXCLUDED.cve_refs,
-                            EXCLUDED.tags)""",
-                (
-                    commit_obj.commit_id,
-                    commit_obj.repository,
-                    commit_obj.timestamp,
-                    commit_obj.hunks,
-                    commit_obj.hunk_count,
-                    commit_obj.message,
-                    commit_obj.diff,
-                    commit_obj.changed_files,
-                    commit_obj.message_reference_content,
-                    list(commit_obj.jira_refs.keys()),
-                    list(commit_obj.ghissue_refs.keys()),
-                    list(commit_obj.ghissue_refs.values()),
-                    list(commit_obj.cve_refs.keys()),
-                    commit_obj.tags,
-                ),
+            cur.callproc(
+                "commits_insert",
+                commit_obj.commit_id,
+                commit_obj.repository,
+                commit_obj.timestamp,
+                commit_obj.hunks,
+                commit_obj.hunk_count,
+                commit_obj.message,
+                commit_obj.diff,
+                commit_obj.changed_files,
+                commit_obj.message_reference_content,
+                list(commit_obj.jira_refs.keys()),
+                list(commit_obj.ghissue_refs.keys()),
+                list(commit_obj.ghissue_refs.values()),
+                list(commit_obj.cve_refs.keys()),
+                commit_obj.tags,
             )
+
             self.connection.commit()
         except Exception:
             _logger.error("Could not save commit vector to database", exc_info=True)
